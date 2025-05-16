@@ -8,7 +8,7 @@ from liveness import is_real_face
 import asyncio
 import sys
 
-# Fix for Windows event loop issue
+# Fix for Windows event loop
 if sys.platform.startswith('win'):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -20,6 +20,7 @@ RTC_CONFIGURATION = RTCConfiguration({
     "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
 })
 
+# Define the main video processor
 class EmotionLivenessProcessor(VideoProcessorBase):
     def _init_(self):
         self.frame_count = 0
@@ -35,9 +36,9 @@ class EmotionLivenessProcessor(VideoProcessorBase):
         # Process every 10th frame to reduce lag
         if self.frame_count % 10 == 0:
             try:
-                resized_img = cv2.resize(img, (224, 224))
+                resized_img = cv2.resize(img, (224, 224))  # Smaller for faster processing
 
-                # Real liveness detection
+                # Real liveness detection using eye detection
                 self.live_result = is_real_face(resized_img)
 
                 if self.live_result:
@@ -67,7 +68,7 @@ class EmotionLivenessProcessor(VideoProcessorBase):
 
         return av.VideoFrame.from_ndarray(display_img, format="bgr24")
 
-# Start the WebRTC streamer
+# Start video streaming in Streamlit
 webrtc_streamer(
     key="live-emotion-detector",
     video_processor_factory=EmotionLivenessProcessor,
